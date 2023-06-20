@@ -3,53 +3,52 @@ import {
   Tabulator,
   CellComponent,
   ColumnComponent,
-  Cell,
-} from 'tabulator-tables';
-import { ReactPortal } from 'react';
-import debounce from 'lodash/debounce';
+  Cell
+} from 'tabulator-tables'
+import { ReactPortal } from 'react'
+import debounce from 'lodash/debounce'
 
 export type RenderFn<T> = (
   component: T,
   el: HTMLElement,
   key: string
-) => ReactPortal;
-type CacheItem = { el: HTMLElement; portal: ReactPortal };
+) => ReactPortal
+type CacheItem = { el: HTMLElement; portal: ReactPortal }
 
 export class ReactTabulatorModule extends Module {
-  _portalCache = new Map<string, CacheItem>();
+  _portalCache = new Map<string, CacheItem>()
 
   cellKeyFn = (cell: CellComponent) => {
     return `cell-${cell.getRow().getIndex()}-${
       cell.getColumn().getDefinition().id
-    }`;
-  };
+    }`
+  }
 
   columnKeyFn = (column: ColumnComponent) => {
-    return `column-${column.getDefinition().id}`;
-  };
+    return `column-${column.getDefinition().id}`
+  }
 
-  debouncedChange: (() => void) | undefined;
+  debouncedChange: (() => void) | undefined
 
   constructor(table: Tabulator) {
-    super(table);
+    super(table)
 
     // todo 通知变更需要debounce，可以考虑使用外部的debounce函数
-    this.registerTableOption('onPortalCacheChange', () => {});
+    this.registerTableOption('onPortalCacheChange', () => {})
 
-    this.registerColumnOption('id', null);
+    this.registerColumnOption('id', null)
 
     this.registerTableFunction(
       'createPortal',
       (fn: RenderFn<Tabulator>, keyFn: (c: Tabulator) => string) => {
-        console.log('create portal table', arguments);
         return this.createComponentPortal<Tabulator>(
           this.table,
           keyFn,
           fn,
           false
-        );
+        )
       }
-    );
+    )
 
     this.registerComponentFunction(
       'cell',
@@ -59,10 +58,10 @@ export class ReactTabulatorModule extends Module {
         fn: RenderFn<CellComponent>,
         cellKeyFn: (c: CellComponent) => string = this.cellKeyFn
       ) => {
-        console.log('cell component');
-        return this.createComponentPortal(cell, cellKeyFn, fn);
+        console.log('cell component')
+        return this.createComponentPortal(cell, cellKeyFn, fn)
       }
-    );
+    )
 
     this.registerComponentFunction(
       'column',
@@ -72,68 +71,68 @@ export class ReactTabulatorModule extends Module {
         fn: RenderFn<ColumnComponent>,
         columnKeyFn: (c: ColumnComponent) => string = this.columnKeyFn
       ) => {
-        console.log('column render');
-        return this.createComponentPortal(column, columnKeyFn, fn);
+        console.log('column render')
+        return this.createComponentPortal(column, columnKeyFn, fn)
       }
-    );
+    )
   }
 
   initialize() {
-    this.subscribe('cell-delete', this.componentDelete.bind(this));
-    this.subscribe('column-delete', this.componentDelete.bind(this));
+    this.subscribe('cell-delete', this.componentDelete.bind(this))
+    this.subscribe('column-delete', this.componentDelete.bind(this))
     // 行或者列移动之后需要重新渲染对应的行或者列
 
     this.debouncedChange = debounce(() => {
-      const portals = this.getCachePortals();
-      this.table.options.onPortalCacheChange(portals);
-    });
+      const portals = this.getCachePortals()
+      this.table.options.onPortalCacheChange(portals)
+    })
   }
 
   get(key: string): CacheItem | undefined {
-    return this._portalCache.get(key);
+    return this._portalCache.get(key)
   }
 
   set(key: string, cache: CacheItem) {
-    const res = this._portalCache.set(key, cache);
-    res && this.debouncedChange?.();
-    return res;
+    const res = this._portalCache.set(key, cache)
+    res && this.debouncedChange?.()
+    return res
   }
 
   delete(key: string) {
-    const res = this._portalCache.delete(key);
-    res && this.debouncedChange?.();
-    return res;
+    const res = this._portalCache.delete(key)
+    res && this.debouncedChange?.()
+    return res
   }
 
   getCachePortals(): Array<ReactPortal> {
-    const portals: ReactPortal[] = [];
+    const portals: ReactPortal[] = []
 
     for (const v of this._portalCache.values()) {
-      portals.push(v.portal);
+      portals.push(v.portal)
     }
 
-    return portals;
+    return portals
   }
 
   addComponentPortalKey<T>(component: T, key: string) {
-    let { react } = (component as any).modules;
+    let { react } = (component as any).modules
     if (!react || !react.keys) {
-      react = react ?? { keys: {} };
-      react.keys = react.keys ?? {};
+      react = react ?? { keys: {} }
+      react.keys = react.keys ?? {}
     }
-    react.keys[key] = true;
+    react.keys[key] = true
   }
 
   removeComponentPortalKey<T>(component: T, key: string) {
-    const { react } = (component as any).modules;
-    if (!react || !react.keys) return;
-    delete react.keys[key];
+    const { react } = (component as any).modules
+    if (!react || !react.keys) return
+    delete react.keys[key]
   }
 
   getComponentPortalKey<T>(component: T) {
-    const keys = (component as any).modules.react?.keys;
-    if (!keys) return [];
-    return Object.keys(keys);
+    const keys = (component as any).modules.react?.keys
+    if (!keys) return []
+    return Object.keys(keys)
   }
 
   createComponentPortal<T>(
@@ -142,31 +141,31 @@ export class ReactTabulatorModule extends Module {
     fn: RenderFn<T>,
     addToComponent = true
   ) {
-    const proxyComponent = component.getComponent?.() ?? component;
-    const key = keyFn(proxyComponent);
-    let cache = this.get(key);
+    const proxyComponent = component.getComponent?.() ?? component
+    const key = keyFn(proxyComponent)
+    let cache = this.get(key)
     if (!cache) {
-      const div = document.createElement('div');
-      const portal = fn(proxyComponent, div, key);
+      const div = document.createElement('div')
+      const portal = fn(proxyComponent, div, key)
       cache = {
         el: div,
-        portal,
-      };
-      if (addToComponent) this.addComponentPortalKey<T>(component, key);
+        portal
+      }
+      if (addToComponent) this.addComponentPortalKey<T>(component, key)
     } else {
-      cache.portal = fn(proxyComponent, cache.el, key);
+      cache.portal = fn(proxyComponent, cache.el, key)
     }
-    this.set(key, cache);
+    this.set(key, cache)
 
-    return cache.el;
+    return cache.el
   }
 
   componentDelete<T>(component: T) {
-    const keys = this.getComponentPortalKey<T>(component);
+    const keys = this.getComponentPortalKey<T>(component)
     for (const k of keys) {
-      this.delete(k);
+      this.delete(k)
     }
   }
 }
 
-ReactTabulatorModule.moduleName = 'ReactTabulatorModule';
+ReactTabulatorModule.moduleName = 'ReactTabulatorModule'

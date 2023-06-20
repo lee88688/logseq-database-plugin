@@ -17,7 +17,8 @@ import {
   FormatModule,
   MoveRowsModule,
   MoveColumnsModule,
-  ResizeColumnsModule
+  ResizeColumnsModule,
+  EditModule
 } from 'tabulator-tables'
 import 'tabulator-tables/dist/css/tabulator.min.css'
 import { ReactTabulatorModule } from './reactTabulatorModule'
@@ -27,6 +28,7 @@ Tabulator.registerModule(FormatModule)
 Tabulator.registerModule(MoveRowsModule)
 Tabulator.registerModule(MoveColumnsModule)
 Tabulator.registerModule(ResizeColumnsModule)
+Tabulator.registerModule(EditModule)
 
 export type Template<T> = (component: T) => ReactNode
 
