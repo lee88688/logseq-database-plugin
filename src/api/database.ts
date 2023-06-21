@@ -86,11 +86,19 @@ export class Database {
     throw new Error('not implemented!')
   }
 
+  async updateColumn(name: string, config: ColumnConfig) {
+    throw new Error('not implemented!')
+  }
+
   async createRow<T>(row: T): Promise<string> {
     throw new Error('not implemented!')
   }
 
   async removeRow(id: string): Promise<boolean> {
+    throw new Error('not implemented!')
+  }
+
+  async updateRow(id: string, row: any): Promise<boolean> {
     throw new Error('not implemented!')
   }
 
