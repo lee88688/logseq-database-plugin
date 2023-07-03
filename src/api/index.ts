@@ -29,6 +29,8 @@ export type ColumnConfig =
     }
 
 const PROPERTY_PREFIX = 'database.'
-export const COLUMN_PREFIX = `${PROPERTY_PREFIX}.column`
+export const COLUMN_PREFIX = `${PROPERTY_PREFIX}.column.`
 export const propertyKey = (...keys: string[]) => `${PROPERTY_PREFIX}${keys.join('.')}`
 export const propertyColumnKey = (name: string) => propertyKey('column', name)
+
+export const DATABASE_VERSION_KEY = propertyKey('version')

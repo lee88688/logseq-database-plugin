@@ -1,13 +1,9 @@
 import {
-  COLUMN_PREFIX,
   ColumnConfig,
-  decodeColumnName,
-  encodeColumnName,
   PageAlreadyExistsError,
   PageCreateError,
-  propertyColumnKey,
-  propertyKey
 } from './index'
+import { createMetaDataFactory, MetaDataBase } from './metaData'
 
 export class Database {
   pageName: string
@@ -15,45 +11,10 @@ export class Database {
   columns: Record<string, ColumnConfig> = {}
   hasMetaCache = false
 
+  metaData?: MetaDataBase
+
   constructor(pageName = '') {
     this.pageName = pageName
-  }
-
-  getInitialPageProperties() {
-    return {
-      [propertyKey('version')]: 1
-    }
-  }
-
-  async fetchDatabaseMeta(force = false) {
-    if (this.hasMetaCache && !force) return
-
-    if (!this.pageName) {
-      throw new Error('page name is not set!')
-    }
-
-    const blocks = await logseq.Editor.getPageBlocksTree(this.pageName)
-    const propertyBlock = blocks[0]
-    if (propertyBlock?.['preBlock?']) {
-      this.propertyBlockId = propertyBlock.uuid
-
-      const properties = propertyBlock.properties
-      const columns: Record<string, ColumnConfig> = {}
-      properties &&
-        Object.keys(propertyBlock.properties ?? {})
-          .filter((key) => key.startsWith(COLUMN_PREFIX))
-          .forEach((key) => {
-            const columnName = decodeColumnName(key.slice(COLUMN_PREFIX.length))
-            const json = properties[columnName]
-            columns[columnName] = JSON.parse(json)
-          })
-      this.columns = columns
-
-      this.hasMetaCache = true
-      return
-    }
-
-    throw new Error('page does not have property block.')
   }
 
   async createDatabase(pageName: string) {
@@ -62,7 +23,9 @@ export class Database {
       throw new PageAlreadyExistsError(`${pageName} already exists`)
     }
 
-    const page = await logseq.Editor.createPage(pageName, this.getInitialPageProperties(), { redirect: false })
+    this.metaData = await createMetaDataFactory(pageName, true)
+
+    const page = await logseq.Editor.createPage(pageName, this.metaData.getInitialPageProperties(), { redirect: false })
     if (!page) {
       throw new PageCreateError('page create failed')
     }
@@ -70,12 +33,16 @@ export class Database {
     return page
   }
 
+  async fetchDatabase() {
+    if (!this.pageName) throw new Error('page name is not found')
+
+    this.metaData = await createMetaDataFactory(this.pageName)
+  }
+
   async createColumn(name: string, config: ColumnConfig) {
-    await this.fetchDatabaseMeta()
+    await this.metaData?.fetchDatabaseMeta()
 
-    const encodeName = encodeColumnName(name)
-
-    await logseq.Editor.upsertBlockProperty(this.propertyBlockId, propertyColumnKey(encodeName), JSON.stringify(config))
+    await this.metaData?.createColumn(name, config)
   }
 
   async removeColumn(name: string) {
