@@ -20,7 +20,8 @@ import {
   ResizeColumnsModule,
   EditModule
 } from 'tabulator-tables'
-import 'tabulator-tables/dist/css/tabulator.min.css'
+// import 'tabulator-tables/dist/css/tabulator.min.css'
+import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'
 import { ReactTabulatorModule } from './reactTabulatorModule'
 
 Tabulator.registerModule(ReactTabulatorModule)
@@ -93,48 +94,43 @@ export function ReactTabulator<D>(props: ReactTabulatorProps<D>) {
   // const portalManagerRef = useRef<PortalManager>();
   const [portals, setPortals] = useState<Array<ReactPortal>>([])
 
-  const pushTask = useTaskQueue<{ type: ColumnOptType; col: Column }>(
-    ({ type, col }) => {
-      if (col.template) {
-        col.formatter = (cell: CellComponent) => {
-          console.log('cell format', cell.getData())
-          return cell.createPortal(
-            (cell: CellComponent, el: HTMLElement, key: string) => {
-              return createPortal(col.template?.(cell), el, key)
-            }
-          )
-        }
-      }
-      if (type === ColumnOptType.Add) {
-        return new Promise((resolve, reject) => {
-          const cols = colsRef.current
-          if (cols.some((item) => item.id === col.id)) {
-            const columnComponents = tabulatorRef.current?.getColumns() ?? []
-            const columnComponent = columnComponents.find((item) => {
-              const def = item.getDefinition() as Column
-              return def.id === col.id
-            })
-            if (!columnComponent) {
-              console.warn('column component is not found')
-              return cols
-            }
-            columnComponent
-              .updateDefinition(col)
-              .then(() => resolve())
-              .catch(reject)
-            colsRef.current = cols.map((item) =>
-              item.id === col.id ? col : item
-            )
-          } else {
-            tabulatorRef.current?.addColumn(col).then(resolve).catch(reject)
-            colsRef.current = cols.concat(col)
-          }
+  const pushTask = useTaskQueue<{ type: ColumnOptType; col: Column }>(({ type, col }) => {
+    if (col.template) {
+      col.formatter = (cell: CellComponent) => {
+        console.log('cell format', cell.getData())
+        return cell.createPortal((cell: CellComponent, el: HTMLElement, key: string) => {
+          el.style.height = '100%'
+          return createPortal(col.template?.(cell), el, key)
         })
       }
-
-      return Promise.resolve()
     }
-  )
+    if (type === ColumnOptType.Add) {
+      return new Promise((resolve, reject) => {
+        const cols = colsRef.current
+        if (cols.some((item) => item.id === col.id)) {
+          const columnComponents = tabulatorRef.current?.getColumns() ?? []
+          const columnComponent = columnComponents.find((item) => {
+            const def = item.getDefinition() as Column
+            return def.id === col.id
+          })
+          if (!columnComponent) {
+            console.warn('column component is not found')
+            return cols
+          }
+          columnComponent
+            .updateDefinition(col)
+            .then(() => resolve())
+            .catch(reject)
+          colsRef.current = cols.map((item) => (item.id === col.id ? col : item))
+        } else {
+          tabulatorRef.current?.addColumn(col).then(resolve).catch(reject)
+          colsRef.current = cols.concat(col)
+        }
+      })
+    }
+
+    return Promise.resolve()
+  })
 
   useEffect(() => {
     if (rootElRef.current) {

@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom'
 import { ReactTabulator } from './reactTabulator/reactTabulator'
 import { Column } from './reactTabulator/reactTabulator'
 import { Button, InputGroup, NumericInput } from '@blueprintjs/core'
-import { Editor } from './reactTabulator/editor'
+import { Editor, selectEditor, textEditor } from './reactTabulator/editor'
+import { Input } from 'src/components/ui/input'
 
 const tabledata = [
   { id: 1, name: 'Oli Bob', age: '12', col: 'red', dob: '' },
@@ -37,60 +38,14 @@ const cols: Array<Column> = [
     title: 'name',
     field: 'name',
     editable: true,
-    editor: (cell, onRendered, success, cancel, editorParams) => {
-      const table = cell.getTable()
-      const tpl = (t: any, el: HTMLElement, key: string) => {
-        return createPortal(
-          <Editor value={cell.getValue()}>
-            {(value, onChange) => (
-              <InputGroup
-                value={value}
-                onChange={(e) => {
-                  onChange(e.target.value)
-                }}
-                onBlur={() => {
-                  success(value)
-                }}
-                autoFocus
-              />
-            )}
-          </Editor>,
-          el,
-          key
-        )
-      }
-      return table.createPortal(tpl, () => 'editor')
-    }
+    editor: textEditor
   },
   {
     id: '2',
     title: 'age',
     field: 'age',
     editable: true,
-    editor: (cell, onRendered, success, cancel, editorParams) => {
-      const table = cell.getTable()
-      const tpl = (t: any, el: HTMLElement, key: string) => {
-        return createPortal(
-          <Editor value={cell.getValue()}>
-            {(value, onChange) => (
-              <NumericInput
-                value={value}
-                onValueChange={(val) => {
-                  onChange(val)
-                }}
-                onBlur={() => success(value)}
-                autoFocus
-                fill
-                buttonPosition={'none'}
-              />
-            )}
-          </Editor>,
-          el,
-          key
-        )
-      }
-      return table.createPortal(tpl, () => 'editor')
-    }
+    editor: selectEditor
   }
 ]
 
