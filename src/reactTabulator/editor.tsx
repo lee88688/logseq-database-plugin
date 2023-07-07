@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Input } from 'src/components/ui/input'
 import * as tabulator from 'tabulator-tables'
-import { Popover, PopoverContent, PopoverTrigger } from 'src/components/ui/popover'
+import { CellPopover } from 'src/components/ui/cell-popover'
+import { EDITOR_PORTAL_KEY } from 'src/reactTabulator/reactTabulatorModule'
 
 export type EditorProps<T> = {
   value: T
@@ -18,19 +19,6 @@ export function Editor<T>(props: EditorProps<T>) {
   }, [props.value])
 
   return props.children(value, setValue)
-}
-
-export function Select() {
-  return (
-    <Popover open onOpenChange={(...args) => console.log(args)}>
-      <PopoverTrigger>
-        <Input onClick={(e) => e.stopPropagation()} />
-      </PopoverTrigger>
-      <PopoverContent align={'start'}>
-        <div>hello world</div>
-      </PopoverContent>
-    </Popover>
-  )
 }
 
 export const textEditor: tabulator.Editor = (cell, onRendered, success, cancel, editorParams) => {
@@ -76,11 +64,18 @@ export const selectEditor: tabulator.Editor = (cell, onRendered, success, cancel
         }
       }
 
-      return <Select />
+      return (
+        <CellPopover onHide={() => cancel(value)}>
+          <Input />
+          {/*<div>pick options</div>*/}
+          {/*<div>value1</div>*/}
+          {/*<div>value2</div>*/}
+        </CellPopover>
+      )
     }
     return createPortal(<Editor value={initialValue}>{child}</Editor>, el, key)
   }
-  const el = table.createPortal(tpl, () => 'editor')
+  const el = table.createPortal(tpl, () => EDITOR_PORTAL_KEY)
   el.style.height = '100%'
   el.style.position = 'relative'
   return el

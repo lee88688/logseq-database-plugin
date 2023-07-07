@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.input {
+  @apply flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.cell-popover {
+  @apply z-50 border bg-popover text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2;
+
+  min-width: var(--radix-popover-trigger-width);
+  /* add border to height */
+  min-height: calc(var(--radix-popover-trigger-height) + 2px);
+  transform: translateY(calc(0px - var(--radix-popper-anchor-height)));
+
+  .input {
+    @apply border-none focus:border-none focus:ring-0 flex-grow;
+
+    height: calc(var(--radix-popover-trigger-height) + 2px);
+  }
+}

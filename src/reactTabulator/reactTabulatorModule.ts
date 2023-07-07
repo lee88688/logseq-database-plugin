@@ -1,27 +1,17 @@
-import {
-  Module,
-  Tabulator,
-  CellComponent,
-  ColumnComponent,
-  Cell
-} from 'tabulator-tables'
+import { Module, Tabulator, CellComponent, ColumnComponent, Cell } from 'tabulator-tables'
 import { ReactPortal } from 'react'
 import debounce from 'lodash/debounce'
 
-export type RenderFn<T> = (
-  component: T,
-  el: HTMLElement,
-  key: string
-) => ReactPortal
+export const EDITOR_PORTAL_KEY = 'editor'
+
+export type RenderFn<T> = (component: T, el: HTMLElement, key: string) => ReactPortal
 type CacheItem = { el: HTMLElement; portal: ReactPortal }
 
 export class ReactTabulatorModule extends Module {
   _portalCache = new Map<string, CacheItem>()
 
   cellKeyFn = (cell: CellComponent) => {
-    return `cell-${cell.getRow().getIndex()}-${
-      cell.getColumn().getDefinition().id
-    }`
+    return `cell-${cell.getRow().getIndex()}-${cell.getColumn().getDefinition().id}`
   }
 
   columnKeyFn = (column: ColumnComponent) => {
@@ -38,26 +28,14 @@ export class ReactTabulatorModule extends Module {
 
     this.registerColumnOption('id', null)
 
-    this.registerTableFunction(
-      'createPortal',
-      (fn: RenderFn<Tabulator>, keyFn: (c: Tabulator) => string) => {
-        return this.createComponentPortal<Tabulator>(
-          this.table,
-          keyFn,
-          fn,
-          false
-        )
-      }
-    )
+    this.registerTableFunction('createPortal', (fn: RenderFn<Tabulator>, keyFn: (c: Tabulator) => string) => {
+      return this.createComponentPortal<Tabulator>(this.table, keyFn, fn, false)
+    })
 
     this.registerComponentFunction(
       'cell',
       'createPortal',
-      (
-        cell: CellComponent,
-        fn: RenderFn<CellComponent>,
-        cellKeyFn: (c: CellComponent) => string = this.cellKeyFn
-      ) => {
+      (cell: CellComponent, fn: RenderFn<CellComponent>, cellKeyFn: (c: CellComponent) => string = this.cellKeyFn) => {
         console.log('cell component')
         return this.createComponentPortal(cell, cellKeyFn, fn)
       }
@@ -80,6 +58,8 @@ export class ReactTabulatorModule extends Module {
   initialize() {
     this.subscribe('cell-delete', this.componentDelete.bind(this))
     this.subscribe('column-delete', this.componentDelete.bind(this))
+    // 取消编辑
+    this.subscribe('edit-editor-clear', () => this.delete(EDITOR_PORTAL_KEY))
     // 行或者列移动之后需要重新渲染对应的行或者列
 
     this.debouncedChange = debounce(() => {
@@ -135,12 +115,7 @@ export class ReactTabulatorModule extends Module {
     return Object.keys(keys)
   }
 
-  createComponentPortal<T>(
-    component: T,
-    keyFn: (c: T) => string,
-    fn: RenderFn<T>,
-    addToComponent = true
-  ) {
+  createComponentPortal<T>(component: T, keyFn: (c: T) => string, fn: RenderFn<T>, addToComponent = true) {
     const proxyComponent = component.getComponent?.() ?? component
     const key = keyFn(proxyComponent)
     let cache = this.get(key)

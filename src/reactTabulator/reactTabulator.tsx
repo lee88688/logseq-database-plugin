@@ -135,7 +135,7 @@ export function ReactTabulator<D>(props: ReactTabulatorProps<D>) {
   useEffect(() => {
     if (rootElRef.current) {
       tabulatorRef.current = new Tabulator(rootElRef.current, {
-        movableRows: true,
+        movableRows: false,
         movableColumns: true,
         onPortalCacheChange: setPortals,
         data: props.data

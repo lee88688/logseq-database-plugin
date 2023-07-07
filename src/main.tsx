@@ -6,7 +6,7 @@ import App from './App'
 import 'normalize.css/normalize.css'
 import '@blueprintjs/core/lib/css/blueprint.css'
 import '@blueprintjs/icons/lib/css/blueprint-icons.css'
-import './index.css'
+import './index.scss'
 import './global.css'
 
 import { logseq as PL } from '../package.json'
