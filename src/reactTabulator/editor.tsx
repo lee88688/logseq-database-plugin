@@ -4,6 +4,7 @@ import { Input } from 'src/components/ui/input'
 import * as tabulator from 'tabulator-tables'
 import { CellPopover } from 'src/components/ui/cell-popover'
 import { EDITOR_PORTAL_KEY } from 'src/reactTabulator/reactTabulatorModule'
+import { CellSelect } from 'src/components/ui/cell-select'
 
 export type EditorProps<T> = {
   value: T
@@ -65,11 +66,12 @@ export const selectEditor: tabulator.Editor = (cell, onRendered, success, cancel
       }
 
       return (
-        <CellPopover onHide={() => cancel(value)}>
-          <Input />
-          {/*<div>pick options</div>*/}
-          {/*<div>value1</div>*/}
-          {/*<div>value2</div>*/}
+        <CellPopover onHide={() => setTimeout(() => cancel(value))}>
+          <CellSelect
+            options={['test', 'test2', 'test4', 'test5']}
+            type={'multiple'}
+            value={['test', 'test2', 'test4', 'test3', 'test33', 'test233']}
+          />
         </CellPopover>
       )
     }

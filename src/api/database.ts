@@ -1,8 +1,4 @@
-import {
-  ColumnConfig,
-  PageAlreadyExistsError,
-  PageCreateError,
-} from './index'
+import { ColumnConfig, PageAlreadyExistsError, PageCreateError } from './index'
 import { createMetaDataFactory, MetaDataBase } from './metaData'
 
 export class Database {
@@ -40,8 +36,6 @@ export class Database {
   }
 
   async createColumn(name: string, config: ColumnConfig) {
-    await this.metaData?.fetchDatabaseMeta()
-
     await this.metaData?.createColumn(name, config)
   }
 

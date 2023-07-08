@@ -1,10 +1,9 @@
-import React, { useRef } from 'react'
-import { createPortal } from 'react-dom'
+import React from 'react'
 import { ReactTabulator } from './reactTabulator/reactTabulator'
 import { Column } from './reactTabulator/reactTabulator'
-import { Button, InputGroup, NumericInput } from '@blueprintjs/core'
 import { Editor, selectEditor, textEditor } from './reactTabulator/editor'
-import { Input } from 'src/components/ui/input'
+import { Badge } from 'src/components/ui/badge'
+import { CellSelect } from 'src/components/ui/cell-select'
 
 const tabledata = [
   { id: 1, name: 'Oli Bob', age: '12', col: 'red', dob: '' },
@@ -52,11 +51,6 @@ const cols: Array<Column> = [
 function App() {
   return (
     <main>
-      <div className={'m-1'}>
-        <Button icon={'refresh'} outlined>
-          clock
-        </Button>
-      </div>
       <ReactTabulator data={tabledata} cols={cols} />
     </main>
   )

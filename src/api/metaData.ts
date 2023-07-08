@@ -1,4 +1,11 @@
-import { COLUMN_PREFIX, ColumnConfig, decodeColumnName, DATABASE_VERSION_KEY, encodeColumnName, propertyColumnKey } from "./index";
+import {
+  COLUMN_PREFIX,
+  ColumnConfig,
+  decodeColumnName,
+  DATABASE_VERSION_KEY,
+  encodeColumnName,
+  propertyColumnKey
+} from './index'
 import { BlockEntity } from '@logseq/libs/dist/LSPlugin'
 
 export abstract class MetaDataBase {
@@ -12,19 +19,20 @@ export abstract class MetaDataBase {
   abstract getInitialPageProperties(): any
 
   abstract createColumn(name: string, config: ColumnConfig): Promise<void>
+  abstract removeColumn(name: string): Promise<void>
 }
 
 class MetaDataBaseV1 extends MetaDataBase {
-  pageName: string;
+  pageName: string
 
   constructor(pageName: string) {
     super()
-    this.pageName = pageName;    
+    this.pageName = pageName
   }
 
   getInitialPageProperties() {
     return {
-      [DATABASE_VERSION_KEY]: 1,
+      [DATABASE_VERSION_KEY]: 1
     }
   }
 
@@ -65,6 +73,11 @@ class MetaDataBaseV1 extends MetaDataBase {
     const encodeName = encodeColumnName(name)
 
     await logseq.Editor.upsertBlockProperty(this.propertyBlockId, propertyColumnKey(encodeName), JSON.stringify(config))
+  }
+
+  async removeColumn(name: string) {
+    const encodeName = encodeColumnName(name)
+    await logseq.Editor.removeBlockProperty(this.propertyBlockId, encodeName)
   }
 }
 
