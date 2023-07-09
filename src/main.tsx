@@ -4,8 +4,8 @@ import React from 'react'
 import * as ReactDOM from 'react-dom/client'
 import App from './App'
 import 'normalize.css/normalize.css'
-import './index.scss'
 import './global.css'
+import './index.scss'
 
 import { logseq as PL } from '../package.json'
 

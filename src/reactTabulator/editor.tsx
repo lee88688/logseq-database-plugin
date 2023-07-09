@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
+import isEqual from 'lodash/isEqual'
 import { Input } from 'src/components/ui/input'
 import * as tabulator from 'tabulator-tables'
 import { CellPopover } from 'src/components/ui/cell-popover'
@@ -9,17 +10,33 @@ import { CellSelect } from 'src/components/ui/cell-select'
 export type EditorProps<T> = {
   value: T
   onChange?: (val: T) => void
-  children: (value: T, onChange: (val: T) => void) => React.ReactElement
+  onSuccess?: (val: T) => void
+  onCancel?: (val: T) => void
+  children: (value: T, onChange: (val: T) => void, success: (val: T) => void, cancel: () => void) => React.ReactElement
 }
 
 export function Editor<T>(props: EditorProps<T>) {
+  const { onSuccess, onCancel } = props
+
   const [value, setValue] = useState(props.value)
+  const initialValurRef = useRef(props.value)
+
+  const success = useCallback(
+    (val: T) => {
+      setTimeout(() => onSuccess?.(val))
+    },
+    [onSuccess]
+  )
+
+  const cancel = useCallback(() => {
+    setTimeout(() => onCancel?.(initialValurRef.current))
+  }, [onCancel])
 
   useEffect(() => {
     setValue(props.value)
   }, [props.value])
 
-  return props.children(value, setValue)
+  return props.children(value, setValue, success, cancel)
 }
 
 export const textEditor: tabulator.Editor = (cell, onRendered, success, cancel, editorParams) => {
@@ -54,11 +71,13 @@ export const textEditor: tabulator.Editor = (cell, onRendered, success, cancel, 
 
 export const selectEditor: tabulator.Editor = (cell, onRendered, success, cancel, editorParams) => {
   const table = cell.getTable()
-  const tpl = (t: any, el: HTMLElement, key: string) => {
-    const initialValue = cell.getValue()
-    const child: EditorProps<string>['children'] = (value, onChange) => {
+  const tpl = (t: unknown, el: HTMLElement, key: string) => {
+    // const initialValue = cell.getValue()
+    const initialValue: string[] = []
+    let options = ['test', 'test2', 'test4', 'test5']
+    const child: EditorProps<string[]>['children'] = (value, onChange) => {
       const handleBlur = () => {
-        if (initialValue === value) {
+        if (isEqual(initialValue, value)) {
           cancel(initialValue)
         } else {
           success(value)
@@ -66,11 +85,17 @@ export const selectEditor: tabulator.Editor = (cell, onRendered, success, cancel
       }
 
       return (
-        <CellPopover onHide={() => setTimeout(() => cancel(value))}>
+        <CellPopover onHide={handleBlur}>
           <CellSelect
-            options={['test', 'test2', 'test4', 'test5']}
+            options={options}
             type={'multiple'}
-            value={['test', 'test2', 'test4', 'test3', 'test33', 'test233']}
+            value={value}
+            onSelect={(val) => onChange(value.concat(val))}
+            onRemove={(val) => onChange(value.filter((item) => item !== val))}
+            onCreate={(val) => {
+              options = options.concat(val)
+              onChange(value.concat(val))
+            }}
           />
         </CellPopover>
       )
