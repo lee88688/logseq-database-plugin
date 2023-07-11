@@ -51,7 +51,7 @@ const cols: Array<Column> = [
 function App() {
   return (
     <main>
-      <ReactTabulator data={tabledata} cols={cols} />
+      <ReactTabulator data={tabledata} cols={cols} onDataChange={(data, meta) => console.log(data, meta)} />
     </main>
   )
 }

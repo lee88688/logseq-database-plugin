@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { Input } from 'src/components/ui/input'
 
 type TagProps = React.PropsWithChildren<{
@@ -27,30 +27,51 @@ type UnionType =
   | {
       type: 'single'
       value: string
+      onSelect?: (item: string, value: string) => void
     }
   | {
       type: 'multiple'
       value: string[]
+      onSelect?: (item: string, value: string[]) => void
     }
 
 type SelectProps = {
   options: string[]
-  onSelect?: (item: string) => void
+
   onRemove?: (item: string) => void
   onCreate?: (item: string) => void
 } & UnionType
 
 export function CellSelect(props: SelectProps) {
-  const { options, value, type } = props
+  const { options, value, type, onSelect } = props
 
   const [inputValue, setInputValue] = useState('')
 
   const selected = Array.isArray(value) ? value : [value]
 
-  const filteredOptions = useMemo(() => {
-    // todo: when item is in options, it should not create new.
-    return options.filter((item) => item.includes(inputValue))
+  const [filteredOptions, hasInputValue] = useMemo(() => {
+    const filtered: string[] = []
+    let hasSameOption = false
+    for (const item of options) {
+      if (item.includes(inputValue)) {
+        filtered.push(item)
+        hasSameOption = hasSameOption || item.length === inputValue.length
+      }
+    }
+    return [filtered, hasSameOption]
   }, [inputValue, options])
+
+  const handleSelect = useCallback(
+    (item: string) => {
+      if (type === 'multiple' && value.includes(item)) return
+      else if (type === 'multiple') {
+        onSelect?.(item, value.concat(item))
+      } else if (type === 'single') {
+        onSelect?.(item, item)
+      }
+    },
+    [onSelect, type, value]
+  )
 
   return (
     <div>
@@ -72,15 +93,12 @@ export function CellSelect(props: SelectProps) {
           <li
             key={item}
             className={'py-1 px-2 cursor-default select-none items-center rounded-sm font-medium hover:bg-accent'}
-            onClick={() => {
-              if (type === 'multiple' && value.includes(item)) return
-              props.onSelect?.(item)
-            }}
+            onClick={() => handleSelect(item)}
           >
             {item}
           </li>
         ))}
-        {inputValue && (
+        {inputValue && !hasInputValue && (
           <li
             className={'px-2 cursor-default select-none items-center rounded-sm font-medium hover:bg-accent'}
             onClick={() => {

@@ -73,7 +73,7 @@ export const selectEditor: tabulator.Editor = (cell, onRendered, success, cancel
   const table = cell.getTable()
   const tpl = (t: unknown, el: HTMLElement, key: string) => {
     // const initialValue = cell.getValue()
-    const initialValue: string[] = []
+    const initialValue: string[] = Array.isArray(cell.getValue()) ? cell.getValue() : []
     let options = ['test', 'test2', 'test4', 'test5']
     const child: EditorProps<string[]>['children'] = (value, onChange) => {
       const handleBlur = () => {

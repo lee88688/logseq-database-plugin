@@ -38,6 +38,27 @@ export type Column = ColDef & {
   template?: Template<CellComponent>
 }
 
+export type DataChangeMeta =
+  | {
+      type: 'cellChange'
+      index: number
+      field: string
+      value: unknown
+    }
+  | {
+      type: 'rowMove'
+      srcIndex: number
+      targetIndex: number
+    }
+  | {
+      type: 'rowDelete'
+      index: number
+    }
+  | {
+      type: 'rowAdd'
+      index: number
+    }
+
 function useLatest<T>(value: T) {
   const ref = useRef(value)
   ref.current = value
@@ -82,11 +103,15 @@ type ReactTabulatorProps<D> = {
   data: Array<D>
   cols: Array<Column>
   children?: ReactNode
+
+  onCellChange?: (rowIndex: number, field: string, value: any, cell: CellComponent) => void
+  onDataChange?: (data: Array<D>, meta: DataChangeMeta) => void
 }
 
 export function ReactTabulator<D>(props: ReactTabulatorProps<D>) {
   const rootElRef = useRef<HTMLDivElement>(null)
   const tabulatorRef = useRef<Tabulator>()
+  const dataRef = useRef(props.data)
 
   const [isTableCreated, setIsTableCreated] = useState(false)
   const colsRef = useRef<Array<Column>>([])
@@ -132,6 +157,24 @@ export function ReactTabulator<D>(props: ReactTabulatorProps<D>) {
     return Promise.resolve()
   })
 
+  const onDataChangeRef = useLatest(props.onDataChange)
+
+  const handleCellChange = useCallback(
+    (cell: CellComponent) => {
+      const rowIndex = cell.getRow().getIndex()
+      const columnKey = cell.getColumn().getField()
+      const val = cell.getValue()
+      console.log('cell change', rowIndex, columnKey)
+      onDataChangeRef.current?.(dataRef.current, {
+        type: 'cellChange',
+        index: rowIndex,
+        field: columnKey,
+        value: val
+      })
+    },
+    [onDataChangeRef]
+  )
+
   useEffect(() => {
     if (rootElRef.current) {
       tabulatorRef.current = new Tabulator(rootElRef.current, {
@@ -141,8 +184,10 @@ export function ReactTabulator<D>(props: ReactTabulatorProps<D>) {
         data: props.data
       })
       tabulatorRef.current.on('tableBuilt', () => setIsTableCreated(true))
+      tabulatorRef.current.on('cellEdited', handleCellChange)
       window.tabulatorRef = tabulatorRef
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -152,6 +197,13 @@ export function ReactTabulator<D>(props: ReactTabulatorProps<D>) {
       }
     }
   }, [isTableCreated, props.cols, pushTask])
+
+  useEffect(() => {
+    if (props.data !== dataRef.current) {
+      dataRef.current = props.data
+      tabulatorRef.current?.setData(props.data)
+    }
+  }, [props.data])
 
   return (
     <div>
