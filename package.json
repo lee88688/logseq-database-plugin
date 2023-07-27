@@ -24,7 +24,7 @@
     "normalize.css": "^8.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tabulator-tables": "^5.5.0",
+    "tabulator-tables": "^5.5.1",
     "tailwind-merge": "^1.13.2",
     "tailwindcss-animate": "^1.0.6"
   },

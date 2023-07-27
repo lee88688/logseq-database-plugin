@@ -1,10 +1,11 @@
-import { Module, Tabulator, CellComponent, ColumnComponent, Cell } from 'tabulator-tables'
-import { ReactPortal } from 'react'
+import { Module, Tabulator, CellComponent, ColumnComponent } from 'tabulator-tables'
+import { ReactPortal, ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import debounce from 'lodash/debounce'
 
 export const EDITOR_PORTAL_KEY = 'editor'
 
-export type RenderFn<T> = (component: T, el: HTMLElement, key: string) => ReactPortal
+export type RenderFn<T> = (component: T) => ReactNode
 type CacheItem = { el: HTMLElement; portal: ReactPortal }
 
 export class ReactTabulatorModule extends Module {
@@ -121,14 +122,14 @@ export class ReactTabulatorModule extends Module {
     let cache = this.get(key)
     if (!cache) {
       const div = document.createElement('div')
-      const portal = fn(proxyComponent, div, key)
+      const portal = createPortal(fn(proxyComponent), div, key)
       cache = {
         el: div,
         portal
       }
       if (addToComponent) this.addComponentPortalKey<T>(component, key)
     } else {
-      cache.portal = fn(proxyComponent, cache.el, key)
+      cache.portal = createPortal(fn(proxyComponent), cache.el, key)
     }
     this.set(key, cache)
 

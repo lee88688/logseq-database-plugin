@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -51,8 +51,8 @@ dependencies:
     specifier: ^18.2.0
     version: 18.2.0(react@18.2.0)
   tabulator-tables:
-    specifier: ^5.5.0
-    version: 5.5.0
+    specifier: ^5.5.1
+    version: 5.5.1
   tailwind-merge:
     specifier: ^1.13.2
     version: 1.13.2
@@ -5295,8 +5295,8 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
-  /tabulator-tables@5.5.0:
-    resolution: {integrity: sha512-UVe26QIaGqFfaP5wfN51zF4Vy23MNTWyvM95bF7EWGsDRQm6b2MV0wiBzakVGFj28YAgz5PvEyfqLZF415PWxw==}
+  /tabulator-tables@5.5.1:
+    resolution: {integrity: sha512-YxWVXbWVgUOMhU/g2xnf7y4Vrk1grYpDftQigbY/yAOKMEfgCRYzNaNEpMZbaimWdCt7KdpIp+lpp+HM5DY5sQ==}
     dev: false
 
   /tailwind-merge@1.13.2:

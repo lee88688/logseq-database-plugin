@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState, useTransition } from 'react'
-import { createPortal } from 'react-dom'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import isEqual from 'lodash/isEqual'
 import { Input } from 'src/components/ui/input'
 import * as tabulator from 'tabulator-tables'
@@ -41,7 +40,7 @@ export function Editor<T>(props: EditorProps<T>) {
 
 export const textEditor: tabulator.Editor = (cell, onRendered, success, cancel, editorParams) => {
   const table = cell.getTable()
-  const tpl = (t: any, el: HTMLElement, key: string) => {
+  const tpl = (t: unknown) => {
     const initialValue = cell.getValue()
     const child: EditorProps<string>['children'] = (value, onChange) => {
       const handleBlur = () => {
@@ -53,17 +52,18 @@ export const textEditor: tabulator.Editor = (cell, onRendered, success, cancel, 
       }
 
       return (
-        <Input
-          value={value}
-          style={{ height: '100%' }}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={handleBlur}
-        />
+        <CellPopover onHide={handleBlur}>
+          <Input
+            value={value}
+            style={{ height: 'calc(var(--radix-popover-trigger-height) + 2px)' }}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </CellPopover>
       )
     }
-    return createPortal(<Editor value={initialValue}>{child}</Editor>, el, key)
+    return <Editor value={initialValue}>{child}</Editor>
   }
-  const el = table.createPortal(tpl, () => 'editor')
+  const el = table.createPortal(tpl, () => EDITOR_PORTAL_KEY)
   el.style.height = '100%'
   el.style.position = 'relative'
   return el
@@ -71,7 +71,7 @@ export const textEditor: tabulator.Editor = (cell, onRendered, success, cancel, 
 
 export const selectEditor: tabulator.Editor = (cell, onRendered, success, cancel, editorParams) => {
   const table = cell.getTable()
-  const tpl = (t: unknown, el: HTMLElement, key: string) => {
+  const tpl = (t: unknown) => {
     // const initialValue = cell.getValue()
     const initialValue: string[] = Array.isArray(cell.getValue()) ? cell.getValue() : []
     let options = ['test', 'test2', 'test4', 'test5']
@@ -100,7 +100,7 @@ export const selectEditor: tabulator.Editor = (cell, onRendered, success, cancel
         </CellPopover>
       )
     }
-    return createPortal(<Editor value={initialValue}>{child}</Editor>, el, key)
+    return <Editor value={initialValue}>{child}</Editor>
   }
   const el = table.createPortal(tpl, () => EDITOR_PORTAL_KEY)
   el.style.height = '100%'
