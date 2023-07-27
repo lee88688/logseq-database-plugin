@@ -14,6 +14,8 @@ export type EditorProps<T> = {
   children: (value: T, onChange: (val: T) => void, success: (val: T) => void, cancel: () => void) => React.ReactElement
 }
 
+const editorAnimationDuration = 150
+
 export function Editor<T>(props: EditorProps<T>) {
   const { onSuccess, onCancel } = props
 
@@ -22,13 +24,13 @@ export function Editor<T>(props: EditorProps<T>) {
 
   const success = useCallback(
     (val: T) => {
-      setTimeout(() => onSuccess?.(val))
+      setTimeout(() => onSuccess?.(val), editorAnimationDuration)
     },
     [onSuccess]
   )
 
   const cancel = useCallback(() => {
-    setTimeout(() => onCancel?.(initialValurRef.current))
+    setTimeout(() => onCancel?.(initialValurRef.current), editorAnimationDuration)
   }, [onCancel])
 
   useEffect(() => {
@@ -42,12 +44,12 @@ export const textEditor: tabulator.Editor = (cell, onRendered, success, cancel, 
   const table = cell.getTable()
   const tpl = (t: unknown) => {
     const initialValue = cell.getValue()
-    const child: EditorProps<string>['children'] = (value, onChange) => {
+    const child: EditorProps<string>['children'] = (value, onChange, onSuccess, onCancel) => {
       const handleBlur = () => {
         if (initialValue === value) {
-          cancel(initialValue)
+          onCancel()
         } else {
-          success(value)
+          onSuccess(value)
         }
       }
 
@@ -61,7 +63,44 @@ export const textEditor: tabulator.Editor = (cell, onRendered, success, cancel, 
         </CellPopover>
       )
     }
-    return <Editor value={initialValue}>{child}</Editor>
+    return <Editor value={initialValue} onSuccess={success} onCancel={cancel}>{child}</Editor>
+  }
+  const el = table.createPortal(tpl, () => EDITOR_PORTAL_KEY)
+  el.style.height = '100%'
+  el.style.position = 'relative'
+  return el
+}
+
+export const numberEditor: tabulator.Editor = (cell, onRendered, success, cancel, editorParams) => {
+  const table = cell.getTable()
+  const tpl = (t: unknown) => {
+    const initialValue = cell.getValue()
+    const child: EditorProps<string>['children'] = (value, onChange, onSuccess, onCancel) => {
+      const handleBlur = () => {
+        if (initialValue === value) {
+          onCancel()
+        } else {
+          onSuccess(value)
+        }
+      }
+
+      return (
+        <CellPopover onHide={handleBlur}>
+          <Input
+            value={value}
+            style={{ height: 'calc(var(--radix-popover-trigger-height) + 2px)' }}
+            onChange={(e) => {
+              console.log('input', e)
+              const currentChar = (e.nativeEvent as InputEvent).data ?? ''
+              if (currentChar >= '0' && currentChar <= '9') {
+                onChange(e.target.value)
+              }
+            }}
+          />
+        </CellPopover>
+      )
+    }
+    return <Editor value={initialValue} onSuccess={success} onCancel={cancel}>{child}</Editor>
   }
   const el = table.createPortal(tpl, () => EDITOR_PORTAL_KEY)
   el.style.height = '100%'
@@ -75,12 +114,12 @@ export const selectEditor: tabulator.Editor = (cell, onRendered, success, cancel
     // const initialValue = cell.getValue()
     const initialValue: string[] = Array.isArray(cell.getValue()) ? cell.getValue() : []
     let options = ['test', 'test2', 'test4', 'test5']
-    const child: EditorProps<string[]>['children'] = (value, onChange) => {
+    const child: EditorProps<string[]>['children'] = (value, onChange, onSuccess, onCancel) => {
       const handleBlur = () => {
         if (isEqual(initialValue, value)) {
-          cancel(initialValue)
+          onCancel()
         } else {
-          success(value)
+          onSuccess(value)
         }
       }
 
@@ -100,7 +139,7 @@ export const selectEditor: tabulator.Editor = (cell, onRendered, success, cancel
         </CellPopover>
       )
     }
-    return <Editor value={initialValue}>{child}</Editor>
+    return <Editor value={initialValue} onSuccess={success} onCancel={cancel}>{child}</Editor>
   }
   const el = table.createPortal(tpl, () => EDITOR_PORTAL_KEY)
   el.style.height = '100%'

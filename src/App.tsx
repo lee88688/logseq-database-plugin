@@ -1,7 +1,7 @@
 import React from 'react'
 import { ReactTabulator } from './reactTabulator/reactTabulator'
 import { Column } from './reactTabulator/reactTabulator'
-import { Editor, selectEditor, textEditor } from './reactTabulator/editor'
+import { Editor, numberEditor, selectEditor, textEditor } from './reactTabulator/editor'
 import { Badge } from 'src/components/ui/badge'
 import { CellSelect } from 'src/components/ui/cell-select'
 import { columnHeader } from './reactTabulator/column'
@@ -46,7 +46,7 @@ const cols: Array<Column> = [
     title: 'age',
     field: 'age',
     editable: true,
-    editor: selectEditor
+    editor: numberEditor
   }
 ]
 
