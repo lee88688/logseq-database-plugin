@@ -72,7 +72,7 @@ export const columnHeader: tabulator.Formatter = (cell: tabulator.CellComponent)
   console.log(cell)
   const column = cell.getColumn()
 
-  const tpl = (t: unknown) => {
+  const tpl = () => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger>{cell.getValue()}</DropdownMenuTrigger>
@@ -97,5 +97,13 @@ export const columnHeader: tabulator.Formatter = (cell: tabulator.CellComponent)
     )
   }
 
+  return column.createPortal(tpl)
+}
+
+export const columnAddHeader: tabulator.Formatter = (cell: tabulator.CellComponent) => {
+  const column = cell.getColumn()
+  const tpl = () => {
+    return <div className={'cursor-pointer'}>+</div>
+  }
   return column.createPortal(tpl)
 }

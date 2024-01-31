@@ -1,10 +1,11 @@
 import React from 'react'
 import { ReactTabulator } from './reactTabulator/reactTabulator'
 import { Column } from './reactTabulator/reactTabulator'
-import { Editor, numberEditor, selectEditor, textEditor } from './reactTabulator/editor'
-import { Badge } from 'src/components/ui/badge'
-import { CellSelect } from 'src/components/ui/cell-select'
+import { numberEditor, textEditor } from './reactTabulator/editor'
 import { columnHeader } from './reactTabulator/column'
+import { Button } from 'src/components/ui/button'
+import { List, ListItem } from 'src/components/ui/list'
+import { Separator } from 'src/components/ui/separator'
 
 const tabledata = [
   { id: 1, name: 'Oli Bob', age: '12', col: 'red', dob: '' },
@@ -53,6 +54,15 @@ const cols: Array<Column> = [
 function App() {
   return (
     <main>
+      <List className={'w-40'}>
+        <ListItem>test1</ListItem>
+        <div role="separator" aria-orientation="horizontal" className="-mx-1 my-1 h-px bg-muted"></div>
+        <ListItem>test2</ListItem>
+        <ListItem>test2</ListItem>
+      </List>
+      <div>
+        <Button variant={'outline'}>add</Button>
+      </div>
       <ReactTabulator data={tabledata} cols={cols} onDataChange={(data, meta) => console.log(data, meta)} />
     </main>
   )

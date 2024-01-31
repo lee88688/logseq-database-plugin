@@ -1,5 +1,4 @@
 import React, { Fragment, ReactNode, ReactPortal, useCallback, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import {
   CellComponent,
   ColumnDefinition as ColDef,
@@ -113,10 +112,11 @@ export function ReactTabulator<D>(props: ReactTabulatorProps<D>) {
     if (col.template) {
       col.formatter = (cell: CellComponent) => {
         console.log('cell format', cell.getData())
-        return cell.createPortal((cell: CellComponent, el: HTMLElement, key: string) => {
-          el.style.height = '100%'
-          return createPortal(col.template?.(cell), el, key)
+        const el = cell.createPortal((cell: CellComponent) => {
+          return col.template?.(cell)
         })
+        el.style.height = '100%'
+        return el
       }
     }
     if (type === ColumnOptType.Add) {

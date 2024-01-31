@@ -15,14 +15,12 @@ declare module 'tabulator-tables' {
     subscribe(name: string, callback: (...args: unknown[]) => void): void
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Tabulator {
-    // @ts-ignore
-    export function registerModule1(module: any): void
+  interface Tabulator {
+    createPortal(cb: RenderFn<Tabulator>, keyFn: (c: Tabulator) => string): HTMLElement
   }
 
   interface CellComponent {
-    createPortal(cb: RenderFn<CellComponent>): HTMLElement
+    createPortal(cb: RenderFn<CellComponent>, cellKeyFn?: (c: CellComponent) => string): HTMLElement
   }
 
   interface ColumnComponent {
