@@ -3,6 +3,33 @@ import { ReactPortal, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import debounce from 'lodash/debounce'
 
+declare module 'tabulator-tables' {
+  interface Module {
+    table: Tabulator
+
+    registerTableOption(key: string, value: unknown): void
+
+    registerColumnOption(key: string, value: unknown): void
+    registerTableFunction(key: string, value: unknown): void
+    registerComponentFunction(component: string, key: string, value: unknown): void
+    subscribe(name: string, callback: (...args: unknown[]) => void): void
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Tabulator {
+    // @ts-ignore
+    export function registerModule1(module: any): void
+  }
+
+  interface CellComponent {
+    createPortal(cb: RenderFn<CellComponent>): HTMLElement
+  }
+
+  interface ColumnComponent {
+    createPortal(cb: RenderFn<ColumnComponent>): HTMLElement
+  }
+}
+
 export const EDITOR_PORTAL_KEY = 'editor'
 
 export type RenderFn<T> = (component: T) => ReactNode
@@ -117,7 +144,7 @@ export class ReactTabulatorModule extends Module {
   }
 
   createComponentPortal<T>(component: T, keyFn: (c: T) => string, fn: RenderFn<T>, addToComponent = true) {
-    const proxyComponent = component.getComponent?.() ?? component
+    const proxyComponent = (component as any).getComponent?.() ?? component
     const key = keyFn(proxyComponent)
     let cache = this.get(key)
     if (!cache) {
