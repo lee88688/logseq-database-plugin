@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { ReactTabulator } from './reactTabulator/reactTabulator'
 import { Column } from './reactTabulator/reactTabulator'
 import { numberEditor, textEditor } from './reactTabulator/editor'
 import { columnHeader } from './reactTabulator/column'
 import { Button } from 'src/components/ui/button'
-import { List, ListItem } from 'src/components/ui/list'
-import { Separator } from 'src/components/ui/separator'
+import { List, ListItem, ListItemButton } from 'src/components/ui/list'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from 'src/components/ui/sheet'
+import { PropertyEditor } from 'src/configEditor/propertyEditor'
 
 const tabledata = [
   { id: 1, name: 'Oli Bob', age: '12', col: 'red', dob: '' },
@@ -52,17 +53,23 @@ const cols: Array<Column> = [
 ]
 
 function App() {
+  const [sheetOpen, setSheetOpen] = useState(false)
+
   return (
     <main>
-      <List className={'w-40'}>
-        <ListItem>test1</ListItem>
-        <div role="separator" aria-orientation="horizontal" className="-mx-1 my-1 h-px bg-muted"></div>
-        <ListItem>test2</ListItem>
-        <ListItem>test2</ListItem>
-      </List>
       <div>
-        <Button variant={'outline'}>add</Button>
+        <Button variant={'outline'} onClick={() => setSheetOpen(true)}>
+          add
+        </Button>
       </div>
+      <Sheet open={sheetOpen} onOpenChange={(open) => setSheetOpen(open)}>
+        <SheetContent className={'px-1'}>
+          <SheetHeader>
+            <SheetTitle>Edit Property</SheetTitle>
+          </SheetHeader>
+          <PropertyEditor />
+        </SheetContent>
+      </Sheet>
       <ReactTabulator data={tabledata} cols={cols} onDataChange={(data, meta) => console.log(data, meta)} />
     </main>
   )
